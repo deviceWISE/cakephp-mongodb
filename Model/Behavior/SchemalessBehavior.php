@@ -39,7 +39,7 @@ class SchemalessBehavior extends ModelBehavior {
  * @var string 'Schemaless'
  * @access public
  */
-	public $name = 'Schemaless';
+  public $name = 'Schemaless';
 
 /**
  * settings property
@@ -47,7 +47,7 @@ class SchemalessBehavior extends ModelBehavior {
  * @var array
  * @access public
  */
-	public $settings = array();
+  public $settings = array();
 
 /**
  * defaultSettings property
@@ -55,8 +55,8 @@ class SchemalessBehavior extends ModelBehavior {
  * @var array
  * @access protected
  */
-	protected $_defaultSettings = array(
-	);
+  protected $_defaultSettings = array(
+  );
 
 /**
  * setup method
@@ -68,9 +68,9 @@ class SchemalessBehavior extends ModelBehavior {
  * @return void
  * @access public
  */
-	public function setup(Model $Model, $config = array()) {
-		//$this->settings[$Model->alias] = array_merge($this->_defaultSettings, $config);
-	}
+  public function setup(Model $Model, $config = array()) {
+    //$this->settings[$Model->alias] = array_merge($this->_defaultSettings, $config);
+  }
 
 /**
  * beforeSave method
@@ -81,9 +81,9 @@ class SchemalessBehavior extends ModelBehavior {
  * @return void
  * @access public
  */
-	public function beforeSave(Model $Model, $config = array()) {
-		$Model->cacheSources = false;
-		$Model->schema(true);
-		return true;
-	}
+  public function beforeSave(Model $Model, $config = array()) {
+    $Model->cacheSources = false;
+    $Model->schema(true);
+    return true;
+  }
 }

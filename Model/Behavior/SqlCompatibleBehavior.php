@@ -36,7 +36,7 @@ class SqlCompatibleBehavior extends ModelBehavior {
  * @var string 'SqlCompatible'
  * @access public
  */
-	public $name = 'SqlCompatible';
+  public $name = 'SqlCompatible';
 
 /**
  * Runtime settings
@@ -46,7 +46,7 @@ class SqlCompatibleBehavior extends ModelBehavior {
  * @var array
  * @access public
  */
-	public $settings = array();
+  public $settings = array();
 
 /**
  * defaultSettings property
@@ -54,20 +54,20 @@ class SqlCompatibleBehavior extends ModelBehavior {
  * @var array
  * @access protected
  */
-	protected $_defaultSettings = array(
-		'convertDates' => true,
-		'dateFormat' => 'Y-M-d H:i:s',
-		'operators' => array(
-			'!=' => '$ne',
-			'>' => '$gt',
-			'>=' => '$gte',
-			'<' => '$lt',
-			'<=' => '$lte',
-			'IN' => '$in',
-			'NOT' => '$not',
-			'NOT IN' => '$nin'
-		)
-	);
+  protected $_defaultSettings = array(
+    'convertDates' => true,
+    'dateFormat' => 'Y-M-d H:i:s',
+    'operators' => array(
+      '!=' => '$ne',
+      '>' => '$gt',
+      '>=' => '$gte',
+      '<' => '$lt',
+      '<=' => '$lte',
+      'IN' => '$in',
+      'NOT' => '$not',
+      'NOT IN' => '$nin'
+    )
+  );
 
 /**
  * setup method
@@ -79,9 +79,9 @@ class SqlCompatibleBehavior extends ModelBehavior {
  * @return void
  * @access public
  */
-	public function setup(Model $Model, $config = array()) {
-		$this->settings[$Model->alias] = array_merge($this->_defaultSettings, $config);
-	}
+  public function setup(Model $Model, $config = array()) {
+    $this->settings[$Model->alias] = array_merge($this->_defaultSettings, $config);
+  }
 
 /**
  * If requested, convert dates from MongoDate objects to standard date strings
@@ -92,12 +92,12 @@ class SqlCompatibleBehavior extends ModelBehavior {
  * @return void
  * @access public
  */
-	public function afterFind(Model $Model, $results, $primary = false) {
-		if ($this->settings[$Model->alias]['convertDates']) {
-			$this->convertDates($this->settings[$Model->alias]['dateFormat'], $results);
-		}
-		return $results;
-	}
+  public function afterFind(Model $Model, $results, $primary = false) {
+    if ($this->settings[$Model->alias]['convertDates']) {
+      $this->convertDates($this->settings[$Model->alias]['dateFormat'], $results);
+    }
+    return $results;
+  }
 
 /**
  * beforeFind method
@@ -109,15 +109,15 @@ class SqlCompatibleBehavior extends ModelBehavior {
  * @return void
  * @access public
  */
-	public function beforeFind(Model $Model, $query) {
-		if (is_array($query['order'])) {
-			$this->_translateOrders($Model, $query['order']);
-		}
-		if (is_array($query['conditions']) && $this->_translateConditions($Model, $query['conditions'])) {
-			return $query;
-		}
-		return $query;
-	}
+  public function beforeFind(Model $Model, $query) {
+    if (is_array($query['order'])) {
+      $this->_translateOrders($Model, $query['order']);
+    }
+    if (is_array($query['conditions']) && $this->_translateConditions($Model, $query['conditions'])) {
+      return $query;
+    }
+    return $query;
+  }
 
 /**
  * Convert MongoDate objects to strings for the purpose of view simplicity
@@ -127,15 +127,15 @@ class SqlCompatibleBehavior extends ModelBehavior {
  * @return void
  * @access protected
  */
-	protected function convertDates($format, &$results) {
-		if (is_array($results)) {
-			foreach($results as &$row) {
-				$this->convertDates($format, $row);
-			}
-		} elseif (is_a($results, 'MongoDate')) {
-			$results = date($format, $results->sec);
-		}
-	}
+  protected function convertDates($format, &$results) {
+    if (is_array($results)) {
+      foreach($results as &$row) {
+        $this->convertDates($format, $row);
+      }
+    } elseif (is_a($results, 'MongoDate')) {
+      $results = date($format, $results->sec);
+    }
+  }
 
 
 /**
@@ -147,16 +147,16 @@ class SqlCompatibleBehavior extends ModelBehavior {
  * @return void
  * @access protected
  */
-	protected function _translateOrders(Model &$Model, &$orders) {
-		if(!empty($orders[0])) {
-			foreach($orders[0] as $key => $val) {
-				if(preg_match('/^(.+) (ASC|DESC)$/i', $val, $match)) {
-					$orders[0][$match[1]] = $match[2];
-					unset($orders[0][$key]);
-				}
-			}
-		}
-	}
+  protected function _translateOrders(Model &$Model, &$orders) {
+    if(!empty($orders[0])) {
+      foreach($orders[0] as $key => $val) {
+        if(preg_match('/^(.+) (ASC|DESC)$/i', $val, $match)) {
+          $orders[0][$match[1]] = $match[2];
+          unset($orders[0][$key]);
+        }
+      }
+    }
+  }
 
 
 /**
@@ -169,115 +169,115 @@ class SqlCompatibleBehavior extends ModelBehavior {
  * @return void
  * @access protected
  */
-	protected function _translateConditions(Model &$Model, &$conditions) {
-		$return = false;
-		foreach($conditions as $key => &$value) {
-			$uKey = strtoupper($key);
-			if (substr($uKey, -6) === 'NOT IN') {
-				// 'Special' case because it has a space in it, and it's the whole key
-				$field = trim(substr($key, 0, -6));
+  protected function _translateConditions(Model &$Model, &$conditions) {
+    $return = false;
+    foreach($conditions as $key => &$value) {
+      $uKey = strtoupper($key);
+      if (substr($uKey, -6) === 'NOT IN') {
+        // 'Special' case because it has a space in it, and it's the whole key
+        $field = trim(substr($key, 0, -6));
 
-				$conditions[$field]['$nin'] = $value;
-				unset($conditions[$key]);
-				$return = true;
-				continue;
-			}
-			if ($uKey === 'OR') {
-				unset($conditions[$key]);
-				foreach($value as $key => $part) {
-					$part = array($key => $part);
-					$this->_translateConditions($Model, $part);
-					$conditions['$or'][] = $part;
-				}
-				$return = true;
-				continue;
-			}
-			if ($key === $Model->primaryKey && is_array($value)) {
-				//_id=>array(1,2,3) pattern, set  $in operator
-				$isMongoOperator = false;
-				foreach($value as $idKey => $idValue) {
-					//check a mongo operator exists
-					if(substr($idKey,0,1) === '$') {
-						$isMongoOperator = true;
-						continue;
-					}
-				}
-				unset($idKey, $idValue);
-				if($isMongoOperator === false) {
-					$conditions[$key] = array('$in' => $value);
-				}
-				$return = true;
-				continue;
-			}
-			if (is_numeric($key) && is_array($value)) {
-				if ($this->_translateConditions($Model, $value)) {
-					$return = true;
-					continue;
-				}
-			}
-			if (substr($uKey, -3) === 'NOT') {
-				// 'Special' case because it's awkward
-				$childKey = key($value);
-				$childValue = current($value);
+        $conditions[$field]['$nin'] = $value;
+        unset($conditions[$key]);
+        $return = true;
+        continue;
+      }
+      if ($uKey === 'OR') {
+        unset($conditions[$key]);
+        foreach($value as $key => $part) {
+          $part = array($key => $part);
+          $this->_translateConditions($Model, $part);
+          $conditions['$or'][] = $part;
+        }
+        $return = true;
+        continue;
+      }
+      if ($key === $Model->primaryKey && is_array($value)) {
+        //_id=>array(1,2,3) pattern, set  $in operator
+        $isMongoOperator = false;
+        foreach($value as $idKey => $idValue) {
+          //check a mongo operator exists
+          if(substr($idKey,0,1) === '$') {
+            $isMongoOperator = true;
+            continue;
+          }
+        }
+        unset($idKey, $idValue);
+        if($isMongoOperator === false) {
+          $conditions[$key] = array('$in' => $value);
+        }
+        $return = true;
+        continue;
+      }
+      if (is_numeric($key) && is_array($value)) {
+        if ($this->_translateConditions($Model, $value)) {
+          $return = true;
+          continue;
+        }
+      }
+      if (substr($uKey, -3) === 'NOT') {
+        // 'Special' case because it's awkward
+        $childKey = key($value);
+        $childValue = current($value);
 
-				if (in_array(substr($childKey, -1), array('>', '<', '='))) {
-					$parts = explode(' ', $childKey);
-					$operator = array_pop($parts);
-					if ($operator = $this->_translateOperator($Model, $operator)) {
-						$childKey = implode(' ', $parts);
-					}
-				} else {
-					$conditions[$childKey]['$nin'] = (array)$childValue;
-					unset($conditions['NOT']);
-					$return = true;
-					continue;
-				}
+        if (in_array(substr($childKey, -1), array('>', '<', '='))) {
+          $parts = explode(' ', $childKey);
+          $operator = array_pop($parts);
+          if ($operator = $this->_translateOperator($Model, $operator)) {
+            $childKey = implode(' ', $parts);
+          }
+        } else {
+          $conditions[$childKey]['$nin'] = (array)$childValue;
+          unset($conditions['NOT']);
+          $return = true;
+          continue;
+        }
 
-				$conditions[$childKey]['$not'][$operator] = $childValue;
-				unset($conditions['NOT']);
-				$return = true;
-				continue;
-			}
-			if (substr($uKey, -5) === ' LIKE') {
-				// 'Special' case because it's awkward
-				if ($value[0] === '%') {
-					$value = substr($value, 1);
-				} else {
-					$value = '^' . $value;
-				}
-				if (substr($value, -1) === '%') {
-					$value = substr($value, 0, -1);
-				} else {
-					$value .= '$';
-				}
-				$value = str_replace('%', '.*', $value);
+        $conditions[$childKey]['$not'][$operator] = $childValue;
+        unset($conditions['NOT']);
+        $return = true;
+        continue;
+      }
+      if (substr($uKey, -5) === ' LIKE') {
+        // 'Special' case because it's awkward
+        if ($value[0] === '%') {
+          $value = substr($value, 1);
+        } else {
+          $value = '^' . $value;
+        }
+        if (substr($value, -1) === '%') {
+          $value = substr($value, 0, -1);
+        } else {
+          $value .= '$';
+        }
+        $value = str_replace('%', '.*', $value);
 
-				$conditions[substr($key, 0, -5)] = new MongoRegex("/$value/i");
-				unset($conditions[$key]);
-				$return = true;
-				continue;
-			}
-			if (!in_array(substr($key, -1), array('>', '<', '='))) {
-				$return = true;
-				continue;
-			}
-			$parts = explode(' ', $key);
-			$operator = array_pop($parts);
-			if ($operator = $this->_translateOperator($Model, $operator)) {
-				$newKey = implode(' ', $parts);
-				$conditions[$newKey][$operator] = $value;
-				unset($conditions[$key]);
-				$return = true;
-			}
-			if (is_array($value)) {
-				if ($this->_translateConditions($Model, $value)) {
-					$return = true;
-					continue;
-				}
-			}
-		}
-		return $return;
-	}
+        $conditions[substr($key, 0, -5)] = new MongoRegex("/$value/i");
+        unset($conditions[$key]);
+        $return = true;
+        continue;
+      }
+      if (!in_array(substr($key, -1), array('>', '<', '='))) {
+        $return = true;
+        continue;
+      }
+      $parts = explode(' ', $key);
+      $operator = array_pop($parts);
+      if ($operator = $this->_translateOperator($Model, $operator)) {
+        $newKey = implode(' ', $parts);
+        $conditions[$newKey][$operator] = $value;
+        unset($conditions[$key]);
+        $return = true;
+      }
+      if (is_array($value)) {
+        if ($this->_translateConditions($Model, $value)) {
+          $return = true;
+          continue;
+        }
+      }
+    }
+    return $return;
+  }
 
 /**
  * translateOperator method
@@ -289,10 +289,10 @@ class SqlCompatibleBehavior extends ModelBehavior {
  * @return string
  * @access protected
  */
-	protected function _translateOperator(Model $Model, $operator) {
-		if (!empty($this->settings[$Model->alias]['operators'][$operator])) {
-			return $this->settings[$Model->alias]['operators'][$operator];
-		}
-		return '';
-	}
+  protected function _translateOperator(Model $Model, $operator) {
+    if (!empty($this->settings[$Model->alias]['operators'][$operator])) {
+      return $this->settings[$Model->alias]['operators'][$operator];
+    }
+    return '';
+  }
 }
